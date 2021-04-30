@@ -98,7 +98,7 @@ __pypackages__/
 celerybeat-schedule
 celerybeat.pid
 
-# SageMath parsed files
+# /home/grisha/Off-policy-off-line-ranking-evaluationSageMath parsed files
 *.sage.py
 
 # Environments
@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# PyCharm
+venv/*
+.idea
