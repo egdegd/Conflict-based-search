@@ -3,9 +3,10 @@ import math
 
 
 class AStarNode:
-    def __init__(self, i=-1, j=-1, g=math.inf, h=math.inf, F=None, parent=None):
+    def __init__(self, i=-1, j=-1, t=-1, g=math.inf, h=math.inf, F=None, parent=None):
         self.i = i
         self.j = j
+        self.t = t
         self.g = g
         self.h = h
         if F is None:
@@ -15,13 +16,13 @@ class AStarNode:
         self.parent = parent
 
     def __eq__(self, other):
-        return (self.i == other.i) and (self.j == other.j)
+        return (self.i == other.i) and (self.j == other.j) and (self.t == other.t)
 
     def __hash__(self):
-        return hash((self.i, self.j))
+        return hash((self.i, self.j, self.t))
 
 
-class NodeHeap:
+class AStarNodeHeap:
 
     def __init__(self, node, k=0):
         self.node = node
@@ -34,10 +35,11 @@ class NodeHeap:
 
 class AStarOpen:
 
-    def __init__(self):
+    def __init__(self, constraints):
         self.elements = []
         self.exists = {}
         self.k = 0
+        self.constraints = constraints
 
     def __len__(self):
         return len(self.elements)
@@ -52,19 +54,21 @@ class AStarOpen:
         smallest = heapq.heappop(self.elements)
         while smallest.removed:
             smallest = heapq.heappop(self.elements)
-        del self.exists[(smallest.node.i, smallest.node.j)]
+        del self.exists[(smallest.node.i, smallest.node.j, smallest.node.t)]
         return smallest.node
 
     def add_node(self, item: AStarNode):
-        if (item.i, item.j) in self.exists:
-            old_node = self.exists[(item.i, item.j)]
+        if (item.i, item.j, item.t) in self.exists:
+            old_node = self.exists[(item.i, item.j, item.t)]
             if old_node.node.g < item.g:
                 return
             old_node.removed = True
-        new_node_heap = NodeHeap(item, self.k)
+        if ((item.i, item.j), item.t) in self.constraints:
+            return
+        new_node_heap = AStarNodeHeap(item, self.k)
         self.k += 1
         heapq.heappush(self.elements, new_node_heap)
-        self.exists[(item.i, item.j)] = new_node_heap
+        self.exists[(item.i, item.j, item.t)] = new_node_heap
 
 
 class AStarClosed:
@@ -92,20 +96,30 @@ def manhattan_distance(i1, j1, i2, j2):
     return abs(i1 - i2) + abs(j1 - j2)
 
 
-def A_star(grid_map, i_start, j_start, i_goal, j_goal, heuristic_function=manhattan_distance,
-           open_type=AStarOpen, closed_type=AStarClosed):
-    OPEN = open_type()
-    CLOSED = closed_type()
-    start_node = AStarNode(i_start, j_start, 0, 0)
+def do_path(node):
+    path = []
+    while node.parent is not None:
+        path.append((node.i, node.j))
+        node = node.parent
+    path.append((node.i, node.j))
+    path.reverse()
+    return path
+
+
+def A_star(grid_map, i_start, j_start, i_goal, j_goal, constraints, heuristic_function=manhattan_distance):
+    OPEN = AStarOpen(constraints)
+    CLOSED = AStarClosed()
+    start_node = AStarNode(i_start, j_start, 0, 0, 0)
     OPEN.add_node(start_node)
     while not OPEN.is_empty():
         cur_node = OPEN.get_best_node()
         CLOSED.add_node(cur_node)
         if cur_node.i == i_goal and cur_node.j == j_goal:
-            return True, cur_node, CLOSED, OPEN
-        for (i, j) in grid_map.GetNeighbors(cur_node.i, cur_node.j):
+            return True, do_path(cur_node)
+        for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
             dist = compute_cost(cur_node.i, cur_node.j, i, j)
-            new_node = AStarNode(i, j, g=cur_node.g + dist, h=heuristic_function(i_goal, j_goal, i, j), parent=cur_node)
+            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.g + dist, h=heuristic_function(i_goal, j_goal, i, j),
+                                 parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)
-    return False, None, CLOSED, OPEN
+    return False, None

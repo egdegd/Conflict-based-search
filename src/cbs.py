@@ -1,55 +1,94 @@
 import math
+import heapq
+
+from src.a_star import A_star
 
 
 class CBSNode:
-    def __init__(self, constraints, parent=None):
+    def __init__(self, constraints, grid_map, agents, parent=None, k=0):
         self.constraints = constraints
         if parent is not None:
             self.solutions = parent.solutions
         else:
             self.solutions = None
+        self.k = k
         self.cost = math.inf
         self.parent = parent
-        self.find_best_solutions()
+        self.find_best_solutions(grid_map, agents)
         self.sum_of_individual_costs()
 
-    def find_best_solutions(self):
-        pass
+    def __lt__(self, other: 'CBSNode'):
+        return (self.cost, -self.k) < (other.cost, other.k)
+
+    def find_best_solutions(self, grid_map, agents):
+        self.solutions = []
+        for i, (s, f) in enumerate(agents):
+            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.constraints.get(i, []))
+            if not found:
+                self.cost = math.inf
+                return
+            self.solutions.append(path)
 
     def sum_of_individual_costs(self):
-        pass
+        self.cost = 0
+        for path in self.solutions:
+            self.cost += len(path)
 
 
 class CBSOpen:
     def __init__(self):
-        pass
+        self.elements = []
 
     def add_node(self, node):
-        pass
+        heapq.heappush(self.elements, node)
 
     def is_empty(self):
-        pass
+        return len(self.elements) == 0
 
     def get_best_node(self):
-        pass
+        return heapq.heappop(self.elements)
 
 
 def find_conflict(node):
-    return True, 0, 0, 0, 0  # found, a_i, a_j, v, t
+    # todo: ай ай ай, как неэффективно я сделал
+    n = len(node.solutions)
+    for i in range(n):
+        for j in range(i + 1, n):
+            for t, v in enumerate(node.solutions[i]):
+                if t >= len(node.solutions[j]):
+                    break
+                if node.solutions[j][t] == v:
+                    return True, i, j, v, t
+    return False, 0, 0, 0, 0  # found, a_i, a_j, v, t
 
 
-def cbs(grid_map):
-    OPEN = CBSOpen()
-    root = CBSNode([])
-    OPEN.add_node(root)
-    while not OPEN.is_empty():
-        best_node = OPEN.get_best_node()
-        found, a, b, v, t = find_conflict(best_node)
-        if not found:
-            return best_node.solutions
-        new_node_1 = CBSNode(best_node.constrainsts + [(b, v, t)], best_node)
-        new_node_2 = CBSNode(best_node.constrainsts + [(a, v, t)], best_node)
-        if new_node_1.cost < math.inf:
-            OPEN.add_node(new_node_1)
-        if new_node_2.cost < math.inf:
-            OPEN.add_node(new_node_2)
+class CBS:
+    def __init__(self, grid_map, agents):
+        self.grid_map = grid_map
+        self.agents = agents
+        self.OPEN = CBSOpen()
+        self.root = CBSNode({}, grid_map, agents)
+        self.OPEN.add_node(self.root)
+        self.counter = 0
+
+    def find_best_solutions(self):
+        while not self.OPEN.is_empty():
+            best_node = self.OPEN.get_best_node()
+            found, a, b, v, t = find_conflict(best_node)
+            if not found:
+                return best_node.solutions
+            # todo: вынести это в отдельную функцию и вообще сделать посимпатичнее (мб использовать setdefault)
+            constraints = best_node.constraints.copy()
+            constraints[b] = constraints.get(b, []) + [(v, t)]
+            new_node_1 = CBSNode(constraints, self.grid_map,
+                                 self.agents, best_node, self.counter)
+            self.counter += 1
+            constraints = best_node.constraints.copy()
+            constraints[a] = constraints.get(a, []) + [(v, t)]
+            new_node_2 = CBSNode(constraints, self.grid_map,
+                                 self.agents, best_node, self.counter)
+            self.counter += 1
+            if new_node_1.cost < math.inf:
+                self.OPEN.add_node(new_node_1)
+            if new_node_2.cost < math.inf:
+                self.OPEN.add_node(new_node_2)
