@@ -51,14 +51,24 @@ class CBSOpen:
 
 def find_conflict(node):
     # todo: ай ай ай, как неэффективно я сделал
+    # да еще и неправильно. После последнего шага агент все время стоит в одной и той же клетке
+    # теперь правильно, но некрасиво
     n = len(node.solutions)
     for i in range(n):
         for j in range(i + 1, n):
-            for t, v in enumerate(node.solutions[i]):
-                if t >= len(node.solutions[j]):
-                    break
-                if node.solutions[j][t] == v:
-                    return True, i, j, v, t
+            sol1 = node.solutions[i]
+            sol2 = node.solutions[j]
+            for t in range(max(len(sol1), len(sol2))):
+                if t >= len(sol1):
+                    v1 = sol1[-1]
+                else:
+                    v1 = sol1[t]
+                if t >= len(sol2):
+                    v2 = sol2[-1]
+                else:
+                    v2 = sol2[t]
+                if v1 == v2:
+                    return True, i, j, v1, t
     return False, 0, 0, 0, 0  # found, a_i, a_j, v, t
 
 
@@ -76,7 +86,7 @@ class CBS:
             best_node = self.OPEN.get_best_node()
             found, a, b, v, t = find_conflict(best_node)
             if not found:
-                return best_node.solutions
+                return best_node.solutions, best_node.cost
             # todo: вынести это в отдельную функцию и вообще сделать посимпатичнее (мб использовать setdefault)
             constraints = best_node.constraints.copy()
             constraints[b] = constraints.get(b, []) + [(v, t)]

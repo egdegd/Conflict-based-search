@@ -50,7 +50,7 @@ class Map:
     # Creates a list of neighbour cells as (i,j) tuples.
     def get_neighbors(self, i, j):  # todo: нужно ли сюда передавать t или это будем учитывать внитри алгоритма.
         neighbors = []
-        delta = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+        delta = [[0, 0], [0, 1], [1, 0], [0, -1], [-1, 0]]
 
         for d in delta:
             if self.in_bounds(i + d[0], j + d[1]) and self.traversable(i + d[0], j + d[1]):
