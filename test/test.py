@@ -37,7 +37,7 @@ def CBS_test(path, agents):
         print(e)
 
 
-A_star_test('../data/maps/simple_map.map')
-CBS_test('../data/maps/simple_map.map', [((1, 1), (13, 28)), ((3, 1), (2, 3))])
-CBS_test('../data/maps/simple_map_2.map', [((0, 0), (0, 4)), ((2, 2), (0, 3))]) # чуть - чуть не работает, я вечером поправлю
+# A_star_test('../data/maps/simple_map.map')
+# CBS_test('../data/maps/simple_map.map', [((1, 1), (13, 28)), ((3, 1), (2, 3))])
+CBS_test('../data/maps/simple_map_2.map', [((0, 0), (0, 4)), ((2, 2), (0, 3))])
 

@@ -53,23 +53,27 @@ def find_conflict(node):
     # todo: ай ай ай, как неэффективно я сделал
     # да еще и неправильно. После последнего шага агент все время стоит в одной и той же клетке
     # теперь правильно, но некрасиво
+    # todo: надо реберные конфликты еще искать
     n = len(node.solutions)
     for i in range(n):
         for j in range(i + 1, n):
             sol1 = node.solutions[i]
             sol2 = node.solutions[j]
             for t in range(max(len(sol1), len(sol2))):
+                ban = 0  # not create a conflict with this agent (1 - i, 2 - j)
                 if t >= len(sol1):
                     v1 = sol1[-1]
+                    ban = 1
                 else:
                     v1 = sol1[t]
                 if t >= len(sol2):
                     v2 = sol2[-1]
+                    ban = 2
                 else:
                     v2 = sol2[t]
                 if v1 == v2:
-                    return True, i, j, v1, t
-    return False, 0, 0, 0, 0  # found, a_i, a_j, v, t
+                    return True, i, j, v1, t, ban
+    return False, 0, 0, 0, 0, -1  # found, a_i, a_j, v, t, ban
 
 
 class CBS:
@@ -84,21 +88,21 @@ class CBS:
     def find_best_solutions(self):
         while not self.OPEN.is_empty():
             best_node = self.OPEN.get_best_node()
-            found, a, b, v, t = find_conflict(best_node)
+            found, a, b, v, t, ban = find_conflict(best_node)
             if not found:
                 return best_node.solutions, best_node.cost
             # todo: вынести это в отдельную функцию и вообще сделать посимпатичнее (мб использовать setdefault)
             constraints = best_node.constraints.copy()
-            constraints[b] = constraints.get(b, []) + [(v, t)]
+            constraints[a] = constraints.get(a, []) + [(v, t)]
             new_node_1 = CBSNode(constraints, self.grid_map,
                                  self.agents, best_node, self.counter)
             self.counter += 1
             constraints = best_node.constraints.copy()
-            constraints[a] = constraints.get(a, []) + [(v, t)]
+            constraints[b] = constraints.get(b, []) + [(v, t)]
             new_node_2 = CBSNode(constraints, self.grid_map,
                                  self.agents, best_node, self.counter)
             self.counter += 1
-            if new_node_1.cost < math.inf:
+            if new_node_1.cost < math.inf and ban != 1:
                 self.OPEN.add_node(new_node_1)
-            if new_node_2.cost < math.inf:
+            if new_node_2.cost < math.inf and ban != 2:
                 self.OPEN.add_node(new_node_2)
