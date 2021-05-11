@@ -1,3 +1,6 @@
+from itertools import product
+
+
 class Map:
 
     # Default constructor
@@ -5,6 +8,7 @@ class Map:
         self.width = 0
         self.height = 0
         self.cells = []
+        self.type = 'octile'
 
     # Initialization of map by string.
     def read_from_string(self, cell_str, width, height):
@@ -47,8 +51,19 @@ class Map:
     def traversable(self, i, j):
         return not self.cells[i][j]
 
-    # Creates a list of neighbour cells as (i,j) tuples.
-    def get_neighbors(self, i, j):  # todo: нужно ли сюда передавать t или это будем учитывать внитри алгоритма.
+    def get_neighbors(self, i, j):
+        if self.type == 'octile':
+            return self.get_neighbors8(i, j)
+        elif self.type == 'quartile':
+            return self.get_neighbors4(i, j)
+        else:
+            raise ValueError('This map type is unsupported')
+
+    def get_neighbors4(self, i, j):  # todo: нужно ли сюда передавать t или это будем учитывать внитри алгоритма.
+        # Works for quartile, i.e.
+        #  |
+        # - -
+        #  |
         neighbors = []
         delta = [[0, 0], [0, 1], [1, 0], [0, -1], [-1, 0]]
 
@@ -56,3 +71,22 @@ class Map:
             if self.in_bounds(i + d[0], j + d[1]) and self.traversable(i + d[0], j + d[1]):
                 neighbors.append((i + d[0], j + d[1]))
         return neighbors
+
+    def get_neighbors8(self, i, j):
+        # Works for octile, i.e.
+        # \|/
+        # - -
+        # /|\
+        # No corners cutting
+        neighbours = []
+        delta = [[0, 1], [1, 0], [0, -1], [-1, 0]]
+
+        for d in delta:
+            if self.in_bounds(i + d[0], j + d[1]) and self.traversable(i + d[0], j + d[1]):
+                neighbours.append((i + d[0], j + d[1]))
+
+        for h, v in product([1, -1], [1, -1]):
+            if (i + h, j) in neighbours and (i, j + v) in neighbours and self.traversable(i + h, j + v):
+                neighbours.append((i + h, j + v))
+
+        return neighbours

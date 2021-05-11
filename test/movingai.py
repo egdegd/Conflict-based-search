@@ -1,3 +1,6 @@
+import math
+
+
 def read_map_from_moving_ai_file(path):
     tasks_file = open(path)
     count = 0
@@ -31,11 +34,13 @@ def read_map_from_moving_ai_file(path):
     return width, height, cells
 
 
-def read_tasks_from_moving_ai_file(path, count):
+def read_tasks_from_moving_ai_file(path):
     tasks = []
     tasks_file = open(path)
     tasks_file.readline()
+    map_file = ''
     for line in tasks_file:
         task = line.split()
-        tasks.append((int(task[5]), int(task[4]), int(task[7]), int(task[6]), float(task[8])))
-    return tasks[::10][:count]
+        tasks.append(((int(task[5]), int(task[4])), (int(task[7]), int(task[6]))))
+        map_file = task[1]
+    return tasks, map_file
