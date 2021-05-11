@@ -19,6 +19,8 @@ def read_map_from_moving_ai_file(path):
                 cells[i][j] = 0
             elif c == '@':
                 cells[i][j] = 1
+            elif c == 'T':
+                cells[i][j] = 1
             else:
                 continue
 
