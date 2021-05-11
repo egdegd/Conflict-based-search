@@ -49,30 +49,37 @@ class CBSOpen:
         return heapq.heappop(self.elements)
 
 
-def find_conflict(node):
+def find_conflict(node: CBSNode):
     # todo: ай ай ай, как неэффективно я сделал
     # да еще и неправильно. После последнего шага агент все время стоит в одной и той же клетке
     # теперь правильно, но некрасиво
     # todo: надо реберные конфликты еще искать
-    n = len(node.solutions)
-    for i in range(n):
-        for j in range(i + 1, n):
-            sol1 = node.solutions[i]
-            sol2 = node.solutions[j]
-            for t in range(max(len(sol1), len(sol2))):
-                ban = 0  # not create a conflict with this agent (1 - i, 2 - j)
-                if t >= len(sol1):
-                    v1 = sol1[-1]
-                    ban = 1
-                else:
-                    v1 = sol1[t]
-                if t >= len(sol2):
-                    v2 = sol2[-1]
-                    ban = 2
-                else:
-                    v2 = sol2[t]
-                if v1 == v2:
-                    return True, i, j, v1, t, ban
+    # n = len(node.solutions)
+    # for i in range(n):
+    #     for j in range(i + 1, n):
+    #         sol1 = node.solutions[i]
+    #         sol2 = node.solutions[j]
+    #         for t in range(max(len(sol1), len(sol2))):
+    #             ban = 0  # not create a conflict with this agent (1 - i, 2 - j)
+    #             if t >= len(sol1):
+    #                 v1 = sol1[-1]
+    #                 ban = 1
+    #             else:
+    #                 v1 = sol1[t]
+    #             if t >= len(sol2):
+    #                 v2 = sol2[-1]
+    #                 ban = 2
+    #             else:
+    #                 v2 = sol2[t]
+    #             if v1 == v2:
+    #                 return True, i, j, v1, t, ban
+    constraints = {}
+    for i, solution in enumerate(node.solutions):
+        for t, v in enumerate(solution):
+            if (v, t) in constraints.keys():
+                return True, i, constraints[(v, t)], v, t, -1
+            else:
+                constraints[(v, t)] = i
     return False, 0, 0, 0, 0, -1  # found, a_i, a_j, v, t, ban
 
 

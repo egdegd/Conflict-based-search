@@ -118,7 +118,7 @@ def A_star(grid_map, i_start, j_start, i_goal, j_goal, constraints, heuristic_fu
             return True, do_path(cur_node)
         for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
             dist = compute_cost(cur_node.i, cur_node.j, i, j)
-            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.g + dist, h=heuristic_function(i_goal, j_goal, i, j),
+            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=heuristic_function(i_goal, j_goal, i, j),
                                  parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)

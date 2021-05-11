@@ -8,7 +8,7 @@ class Map:
         self.width = 0
         self.height = 0
         self.cells = []
-        self.type = 'octile'
+        self.type = 'quartile'
 
     # Initialization of map by string.
     def read_from_string(self, cell_str, width, height):
