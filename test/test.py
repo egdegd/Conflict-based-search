@@ -7,6 +7,7 @@ from src.map import Map
 from movingai import read_map_from_moving_ai_file, read_tasks_from_moving_ai_file
 from os import path
 from random import sample
+from src.visualization import draw
 
 
 def A_star_test(path):
@@ -26,6 +27,7 @@ def CBS_test(task_map, agents, status):
     try:
         cbs = CBS(task_map, agents)
         sol, cost = cbs.find_best_solutions()
+        draw(task_map, sol, agents)
         if cost < math.inf:
             status.append("Found!")
             # print(sol)
@@ -62,4 +64,5 @@ def big_test(scenario_path, min_agents, max_agents, step=5, sample_times=20, exp
 
 
 # big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 5, 75)
-big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 21, 1)
+big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1)
+# big_test('../data/scenarios/mice.scen', 2, 2, 1, 1)
