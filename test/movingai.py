@@ -12,9 +12,9 @@ def read_map_from_moving_ai_file(path):
     i = 0
     j = 0
 
-    for l in tasks_file:
+    for line in tasks_file:
         j = 0
-        for c in l:
+        for c in line:
             if c == '.':
                 cells[i][j] = 0
             elif c == '@':

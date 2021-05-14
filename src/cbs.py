@@ -18,7 +18,7 @@ class CBSNode:
         self.sum_of_individual_costs()
 
     def __lt__(self, other: 'CBSNode'):
-        return (self.cost, -self.k) < (other.cost, other.k)
+        return (self.cost, -self.k) < (other.cost, -other.k)
 
     def find_best_solutions(self, grid_map, agents):
         self.solutions = []

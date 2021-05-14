@@ -54,12 +54,12 @@ class AStarOpen:
         smallest = heapq.heappop(self.elements)
         while smallest.removed:
             smallest = heapq.heappop(self.elements)
-        del self.exists[(smallest.node.i, smallest.node.j, smallest.node.t)]
+        del self.exists[smallest.node]
         return smallest.node
 
     def add_node(self, item: AStarNode):
-        if (item.i, item.j, item.t) in self.exists:
-            old_node = self.exists[(item.i, item.j, item.t)]
+        if item in self.exists:
+            old_node = self.exists[item]
             if old_node.node.g < item.g:
                 return
             old_node.removed = True
@@ -68,7 +68,7 @@ class AStarOpen:
         new_node_heap = AStarNodeHeap(item, self.k)
         self.k += 1
         heapq.heappush(self.elements, new_node_heap)
-        self.exists[(item.i, item.j, item.t)] = new_node_heap
+        self.exists[item] = new_node_heap
 
 
 class AStarClosed:

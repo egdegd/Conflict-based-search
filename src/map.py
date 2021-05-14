@@ -17,11 +17,10 @@ class Map:
         self.cells = [[0 for _ in range(width)] for _ in range(height)]
         cell_lines = cell_str.split("\n")
         i = 0
-        j = 0
-        for l in cell_lines:
-            if len(l) != 0:
+        for line in cell_lines:
+            if len(line) != 0:
                 j = 0
-                for c in l:
+                for c in line:
                     if c == '.':
                         self.cells[i][j] = 0
                     elif c == '#':
@@ -49,7 +48,7 @@ class Map:
 
     # Checks cell is not obstacle.
     def traversable(self, i, j):
-        return not self.cells[i][j]
+        return self.cells[i][j] == 0
 
     def get_neighbors(self, i, j):
         if self.type == 'octile':
