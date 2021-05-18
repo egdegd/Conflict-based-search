@@ -59,8 +59,9 @@ def find_vertex_conflict(node: CBSNode):
     for t in range(max_len):
         for i, solution in enumerate(node.solutions):
             if len(solution) <= t:
-                continue
-            v = solution[t]
+                v = solution[-1]
+            else:
+                v = solution[t]
             if (v, t) in constraints_vertices.keys():
                 j = constraints_vertices[(v, t)]
                 return i, j, v, t

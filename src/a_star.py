@@ -116,10 +116,14 @@ def A_star(grid_map,
     CLOSED = AStarClosed()
     start_node = AStarNode(i_start, j_start, 0, 0, 0)
     OPEN.add_node(start_node)
+    vertex_max_time = max(map(lambda x: x[1], vertex_constraints)) if vertex_constraints else 0
+    edge_max_time = max(map(lambda x: x[1], edge_constraints)) if edge_constraints else 0
+    max_time = max(edge_max_time, vertex_max_time)
+    cur_time = 0
     while not OPEN.is_empty():
         cur_node = OPEN.get_best_node()
         CLOSED.add_node(cur_node)
-        if cur_node.i == i_goal and cur_node.j == j_goal:
+        if cur_node.i == i_goal and cur_node.j == j_goal and cur_time > max_time:
             return True, do_path(cur_node)
         for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
             to, frm, t = (i, j), (cur_node.i, cur_node.j), cur_node.t
@@ -132,4 +136,5 @@ def A_star(grid_map,
                                  parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)
+        cur_time += 1
     return False, None
