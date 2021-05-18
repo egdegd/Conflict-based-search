@@ -71,25 +71,6 @@ def find_vertex_conflict(node: CBSNode):
     return None, None, None, None
 
 
-def find_edge_conflict(node: CBSNode):
-    # time associated with edge is the start time
-    constraints_edges = {}  # map from (from_vertex, to_vertex, from_time) to path
-    max_len = len(max(node.solutions, key=lambda x: len(x)))
-
-    for t in range(max_len):
-        for i, solution in enumerate(node.solutions):
-            if len(solution) <= t + 1:
-                continue
-            frm, to = solution[t], solution[t + 1]
-            if (to, frm, t) in constraints_edges.keys():
-                j = constraints_edges[(to, frm, t)]
-                return i, j, (frm, to), t
-
-            constraints_edges[(frm, to, t)] = i
-
-    return None, None, None, None
-
-
 class CBS:
     def __init__(self, grid_map, agents):
         self.grid_map = grid_map
@@ -142,8 +123,26 @@ class CBS:
             if agent1_vert is not None:
                 self.add_children_from_vertex_constraint(best_node, agent1_vert, agent2_vert, v, t_vert)
             else:
-                agent1_edge, agent2_edge, e, t_edge = find_edge_conflict(best_node)
+                agent1_edge, agent2_edge, e, t_edge = self.find_edge_conflict(best_node)
                 if agent1_edge is not None:
                     self.add_children_from_edge_constraint(best_node, agent1_edge, agent2_edge, e, t_edge)
                 else:
                     return best_node.solutions, best_node.cost
+
+    def find_edge_conflict(self, node: CBSNode):
+        # time associated with edge is the start time
+        constraints_edges = {}  # map from (from_vertex, to_vertex, from_time) to path
+        max_len = len(max(node.solutions, key=lambda x: len(x)))
+
+        for t in range(max_len):
+            for i, solution in enumerate(node.solutions):
+                if len(solution) <= t + 1:
+                    continue
+                frm, to = solution[t], solution[t + 1]
+                if (to, frm, t) in constraints_edges.keys():
+                    j = constraints_edges[(to, frm, t)]
+                    return i, j, (frm, to), t
+
+                constraints_edges[(frm, to, t)] = i
+
+        return None, None, None, None
