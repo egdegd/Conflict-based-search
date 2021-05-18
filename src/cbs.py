@@ -1,12 +1,15 @@
 import math
 import heapq
+from collections import defaultdict
+from copy import deepcopy
 
 from src.a_star import A_star
 
 
 class CBSNode:
-    def __init__(self, constraints, grid_map, agents, parent=None, k=0):
-        self.constraints = constraints
+    def __init__(self, vertex_constraints, edge_constraints, grid_map, agents, parent=None, k=0):
+        self.vertex_constraints = vertex_constraints
+        self.edge_constraints = edge_constraints
         if parent is not None:
             self.solutions = parent.solutions
         else:
@@ -23,7 +26,7 @@ class CBSNode:
     def find_best_solutions(self, grid_map, agents):
         self.solutions = []
         for i, (s, f) in enumerate(agents):
-            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.constraints.get(i, []))
+            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.vertex_constraints[i], self.edge_constraints[i])
             if not found:
                 self.cost = math.inf
                 return
@@ -49,52 +52,41 @@ class CBSOpen:
         return heapq.heappop(self.elements)
 
 
-def find_conflict(node: CBSNode):
-    # todo: ай ай ай, как неэффективно я сделал
-    # да еще и неправильно. После последнего шага агент все время стоит в одной и той же клетке
-    # теперь правильно, но некрасиво
-    # todo: надо реберные конфликты еще искать
-    # n = len(node.solutions)
-    # for i in range(n):
-    #     for j in range(i + 1, n):
-    #         sol1 = node.solutions[i]
-    #         sol2 = node.solutions[j]
-    #         for t in range(max(len(sol1), len(sol2))):
-    #             ban = 0  # not create a conflict with this agent (1 - i, 2 - j)
-    #             if t >= len(sol1):
-    #                 v1 = sol1[-1]
-    #                 ban = 1
-    #             else:
-    #                 v1 = sol1[t]
-    #             if t >= len(sol2):
-    #                 v2 = sol2[-1]
-    #                 ban = 2
-    #             else:
-    #                 v2 = sol2[t]
-    #             if v1 == v2:
-    #                 return True, i, j, v1, t, ban
-
-    # constraints = {}
-    # for i, solution in enumerate(node.solutions):
-    #     for t, v in enumerate(solution):
-    #         if (v, t) in constraints.keys():
-    #             return True, i, constraints[(v, t)], v, t, -1
-    #         else:
-    #             constraints[(v, t)] = i
-
-    constraints = {}
+def find_vertex_conflict(node: CBSNode):
+    constraints_vertices = {}  # map from (vertex, time) to path
     max_len = len(max(node.solutions, key=lambda x: len(x)))
-    solutions = []
-    for i, solution in enumerate(node.solutions):
-        solutions.append(solution + [solution[-1]] * (max_len - len(solution)))
+
     for t in range(max_len):
-        for i, solution in enumerate(solutions):
+        for i, solution in enumerate(node.solutions):
+            if len(solution) <= t:
+                continue
             v = solution[t]
-            if (v, t) in constraints.keys():
-                return True, i, constraints[(v, t)], v, t, -1
-            else:
-                constraints[(v, t)] = i
-    return False, 0, 0, 0, 0, -1  # found, a_i, a_j, v, t, ban
+            if (v, t) in constraints_vertices.keys():
+                j = constraints_vertices[(v, t)]
+                return i, j, v, t
+
+            constraints_vertices[(v, t)] = i
+
+    return None, None, None, None
+
+
+def find_edge_conflict(node: CBSNode):
+    # time associated with edge is the start time
+    constraints_edges = {}  # map from (from_vertex, to_vertex, from_time) to path
+    max_len = len(max(node.solutions, key=lambda x: len(x)))
+
+    for t in range(max_len):
+        for i, solution in enumerate(node.solutions):
+            if len(solution) <= t + 1:
+                continue
+            frm, to = solution[t], solution[t + 1]
+            if (to, frm, t) in constraints_edges.keys():
+                j = constraints_edges[(to, frm, t)]
+                return i, j, (frm, to), t
+
+            constraints_edges[(frm, to, t)] = i
+
+    return None, None, None, None
 
 
 class CBS:
@@ -102,43 +94,55 @@ class CBS:
         self.grid_map = grid_map
         self.agents = agents
         self.OPEN = CBSOpen()
-        self.root = CBSNode({}, grid_map, agents)
+        self.root = CBSNode(defaultdict(lambda: []), defaultdict(lambda: []), grid_map, agents)
         self.OPEN.add_node(self.root)
-        self.counter = 0
+        self.node_counter = 0
+
+    def add_children_from_vertex_constraint(self, node: CBSNode, agent1, agent2, vertex, time):
+        edge_constraints = deepcopy(node.edge_constraints)
+        vertex_constraints1 = deepcopy(node.vertex_constraints)
+        vertex_constraints1[agent1].append((vertex, time))
+        new_node_1 = CBSNode(vertex_constraints1, edge_constraints, self.grid_map,
+                             self.agents, node, self.node_counter)
+        self.node_counter += 1
+        vertex_constraints2 = deepcopy(node.vertex_constraints)
+        vertex_constraints2[agent2].append((vertex, time))
+
+        new_node_2 = CBSNode(vertex_constraints2, edge_constraints, self.grid_map,
+                             self.agents, node, self.node_counter)
+        self.node_counter += 1
+        if new_node_1.cost < math.inf:
+            self.OPEN.add_node(new_node_1)
+        if new_node_2.cost < math.inf:
+            self.OPEN.add_node(new_node_2)
+
+    def add_children_from_edge_constraint(self, node: CBSNode, agent1, agent2, edge, time):
+        vertex_constraints = deepcopy(node.vertex_constraints)
+        edge_constraints1 = deepcopy(node.edge_constraints)
+        edge_constraints1[agent1].append((edge, time))
+        new_node_1 = CBSNode(vertex_constraints, edge_constraints1, self.grid_map,
+                             self.agents, node, self.node_counter)
+        self.node_counter += 1
+        edge_constraints2 = deepcopy(node.edge_constraints)
+        edge_constraints2[agent2].append((edge, time))
+
+        new_node_2 = CBSNode(vertex_constraints, edge_constraints2, self.grid_map,
+                             self.agents, node, self.node_counter)
+        self.node_counter += 1
+        if new_node_1.cost < math.inf:
+            self.OPEN.add_node(new_node_1)
+        if new_node_2.cost < math.inf:
+            self.OPEN.add_node(new_node_2)
 
     def find_best_solutions(self):
         while not self.OPEN.is_empty():
             best_node = self.OPEN.get_best_node()
-            found, a, b, v, t, ban = find_conflict(best_node)
-            if not found:
-                return best_node.solutions, best_node.cost
-            # todo: вынести это в отдельную функцию и вообще сделать посимпатичнее (мб использовать setdefault)
-            constraints = best_node.constraints.copy()
-            constraints_ = constraints.get(a, [])
-            if (v, t) in constraints_:
-                t_ = t
-                while (v, t_) in constraints_:
-                    t_ -= 1
-                constraints[a] = constraints.get(a, []) + [(v, t_)]
+            agent1_vert, agent2_vert, v, t_vert = find_vertex_conflict(best_node)
+            if agent1_vert is not None:
+                self.add_children_from_vertex_constraint(best_node, agent1_vert, agent2_vert, v, t_vert)
             else:
-                constraints[a] = constraints.get(a, []) + [(v, t)]
-            new_node_1 = CBSNode(constraints, self.grid_map,
-                                 self.agents, best_node, self.counter)
-            self.counter += 1
-            constraints = best_node.constraints.copy()
-            constraints_ = constraints.get(b, [])
-            if (v, t) in constraints_:
-                t_ = t
-                while(v, t_) in constraints_:
-                    t_ -= 1
-                constraints[b] = constraints.get(b, []) + [(v, t_)]
-            else:
-                constraints[b] = constraints.get(b, []) + [(v, t)]
-
-            new_node_2 = CBSNode(constraints, self.grid_map,
-                                 self.agents, best_node, self.counter)
-            self.counter += 1
-            if new_node_1.cost < math.inf and ban != 1:
-                self.OPEN.add_node(new_node_1)
-            if new_node_2.cost < math.inf and ban != 2:
-                self.OPEN.add_node(new_node_2)
+                agent1_edge, agent2_edge, e, t_edge = find_edge_conflict(best_node)
+                if agent1_edge is not None:
+                    self.add_children_from_edge_constraint(best_node, agent1_edge, agent2_edge, e, t_edge)
+                else:
+                    return best_node.solutions, best_node.cost

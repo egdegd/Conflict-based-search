@@ -35,11 +35,10 @@ class AStarNodeHeap:
 
 class AStarOpen:
 
-    def __init__(self, constraints):
+    def __init__(self):
         self.elements = []
         self.exists = {}
         self.k = 0
-        self.constraints = constraints
 
     def __len__(self):
         return len(self.elements)
@@ -63,8 +62,6 @@ class AStarOpen:
             if old_node.node.g < item.g:
                 return
             old_node.removed = True
-        if ((item.i, item.j), item.t) in self.constraints:
-            return
         new_node_heap = AStarNodeHeap(item, self.k)
         self.k += 1
         heapq.heappush(self.elements, new_node_heap)
@@ -106,8 +103,16 @@ def do_path(node):
     return path
 
 
-def A_star(grid_map, i_start, j_start, i_goal, j_goal, constraints, heuristic_function=manhattan_distance):
-    OPEN = AStarOpen(constraints)
+def A_star(grid_map,
+           i_start,
+           j_start,
+           i_goal,
+           j_goal,
+           vertex_constraints,
+           edge_constraints,
+           heuristic_function=manhattan_distance
+           ):
+    OPEN = AStarOpen()
     CLOSED = AStarClosed()
     start_node = AStarNode(i_start, j_start, 0, 0, 0)
     OPEN.add_node(start_node)
@@ -117,7 +122,12 @@ def A_star(grid_map, i_start, j_start, i_goal, j_goal, constraints, heuristic_fu
         if cur_node.i == i_goal and cur_node.j == j_goal:
             return True, do_path(cur_node)
         for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
-            dist = compute_cost(cur_node.i, cur_node.j, i, j)
+            to, frm, t = (i, j), (cur_node.i, cur_node.j), cur_node.t
+            if (to, t + 1) in vertex_constraints or \
+                    ((to, frm), t) in edge_constraints or \
+                    ((frm, to), t) in edge_constraints:
+                continue
+
             new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=heuristic_function(i_goal, j_goal, i, j),
                                  parent=cur_node)
             if not CLOSED.was_expanded(new_node):

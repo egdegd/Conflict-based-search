@@ -45,7 +45,7 @@ def draw(grid_map: Map, solutions, agents):
 
     cur_i = 0
     while True:
-        cv2.imshow('Video', cv2.resize(sequence[cur_i], (360, 360)))
+        cv2.imshow('Video', cv2.resize(sequence[cur_i], (360, round(360 / w_im * h_im))))
         key = cv2.waitKey(0) & 0xFF
         if key == ord('a'):
             cur_i = max(cur_i - 1, 0)
