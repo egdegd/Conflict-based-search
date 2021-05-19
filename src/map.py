@@ -89,3 +89,6 @@ class Map:
                 neighbours.append((i + h, j + v))
 
         return neighbours
+
+    def all_vertices(self):
+        return product(range(self.height), range(self.width))
