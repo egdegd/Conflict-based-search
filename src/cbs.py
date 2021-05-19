@@ -38,6 +38,8 @@ class CBSNode:
             return
         self.cost = 0
         for path in self.solutions:
+            while len(path) >= 2 and path[-1] == path[-2]:
+                path.pop()
             self.cost += len(path)
 
 

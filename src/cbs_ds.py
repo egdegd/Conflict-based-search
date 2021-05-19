@@ -50,6 +50,7 @@ class CBS_DS(CBS):
         self.node_counter += 1
 
         vertex_constraints2 = deepcopy(node.vertex_constraints)
+        vertex_constraints2[agent2].append((vertex, time))
         landmarks2 = deepcopy(node.landmarks)
         landmarks2[agent1] = sorted(landmarks2[agent1] + [(vertex, time)], key=lambda l: l[1])
         new_node_2 = CBS_DS_Node(vertex_constraints2, edge_constraints, landmarks2, self.grid_map,
@@ -57,7 +58,7 @@ class CBS_DS(CBS):
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
-        if new_node_2.cost < math.inf and (vertex, time) not in node.landmarks[agent1]:
+        if new_node_2.cost < math.inf:
             self.OPEN.add_node(new_node_2)
 
     def add_children_from_edge_constraint(self, node: CBS_DS_Node, agent1, agent2, edge, time):
