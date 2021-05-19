@@ -13,21 +13,22 @@ class CBS_DS_Node(CBSNode):
     def find_best_solutions(self, grid_map, agents):
         self.solutions = []
         for i, (s, f) in enumerate(agents):
-            path = []
+            path = [s]
             for (v1, t1), (v2, t2) in zip(self.landmarks[i], self.landmarks[i][1:]):
                 found, path_segment = A_star_DS(grid_map, v1[0], v1[1], t1, v2[0], v2[1], t2,
                                                 self.vertex_constraints[i], self.edge_constraints[i])
                 if not found:
                     self.cost = math.inf
                     return
-                path += path_segment
+                path += path_segment[1:]
             v_last, _ = self.landmarks[i][-1]
+
             found, path_segment = A_star(grid_map, v_last[0], v_last[1], f[0], f[1],
                                          self.vertex_constraints[i], self.edge_constraints[i])
             if not found:
                 self.cost = math.inf
                 return
-            path += path_segment
+            path += path_segment[1:]
             self.solutions.append(path)
 
 
@@ -50,8 +51,27 @@ class CBS_DS(CBS):
 
         vertex_constraints2 = deepcopy(node.vertex_constraints)
         landmarks2 = deepcopy(node.landmarks)
-        landmarks2[agent1].append((vertex, time))
+        landmarks2[agent1] = sorted(landmarks2[agent1] + [(vertex, time)], key=lambda l: l[1])
         new_node_2 = CBS_DS_Node(vertex_constraints2, edge_constraints, landmarks2, self.grid_map,
+                                 self.agents, node, self.node_counter)
+        self.node_counter += 1
+        if new_node_1.cost < math.inf:
+            self.OPEN.add_node(new_node_1)
+        if new_node_2.cost < math.inf:
+            self.OPEN.add_node(new_node_2)
+
+    def add_children_from_edge_constraint(self, node: CBS_DS_Node, agent1, agent2, edge, time):
+        vertex_constraints = deepcopy(node.vertex_constraints)
+        landmarks = deepcopy(node.landmarks)
+        edge_constraints1 = deepcopy(node.edge_constraints)
+        edge_constraints1[agent1].append((edge, time))
+        new_node_1 = CBS_DS_Node(vertex_constraints, edge_constraints1, landmarks, self.grid_map,
+                                 self.agents, node, self.node_counter)
+        self.node_counter += 1
+        edge_constraints2 = deepcopy(node.edge_constraints)
+        edge_constraints2[agent2].append((edge, time))
+
+        new_node_2 = CBS_DS_Node(vertex_constraints, edge_constraints2, landmarks, self.grid_map,
                                  self.agents, node, self.node_counter)
         self.node_counter += 1
         if new_node_1.cost < math.inf:

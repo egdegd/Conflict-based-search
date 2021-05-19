@@ -16,7 +16,7 @@ class CBSNode:
         else:
             self.solutions = None
         self.k = k
-        self.cost = math.inf
+        self.cost = None
         self.parent = parent
         self.find_best_solutions(grid_map, agents)
         self.sum_of_individual_costs()
@@ -34,6 +34,8 @@ class CBSNode:
             self.solutions.append(path)
 
     def sum_of_individual_costs(self):
+        if self.cost is not None:
+            return
         self.cost = 0
         for path in self.solutions:
             self.cost += len(path)

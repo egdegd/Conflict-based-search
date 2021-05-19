@@ -167,6 +167,8 @@ def A_star_DS(grid_map,
     cur_time = 0
     while not OPEN.is_empty():
         cur_node = OPEN.get_best_node()
+        if cur_node.t > t_goal:
+            continue
         CLOSED.add_node(cur_node)
         if cur_node.i == i_goal and cur_node.j == j_goal and cur_node.t == t_goal and cur_time > max_time:
             return True, do_path(cur_node)
