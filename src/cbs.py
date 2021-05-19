@@ -96,9 +96,13 @@ class CBS:
         self.grid_map = grid_map
         self.agents = agents
         self.OPEN = CBSOpen()
-        self.root = CBSNode(defaultdict(lambda: []), defaultdict(lambda: []), grid_map, agents)
-        self.OPEN.add_node(self.root)
+        self.root = None
+        self.make_root()
         self.node_counter = 0
+
+    def make_root(self):
+        self.root = CBSNode(defaultdict(lambda: []), defaultdict(lambda: []), self.grid_map, self.agents)
+        self.OPEN.add_node(self.root)
 
     def add_children_from_vertex_constraint(self, node: CBSNode, agent1, agent2, vertex, time):
         edge_constraints = deepcopy(node.edge_constraints)

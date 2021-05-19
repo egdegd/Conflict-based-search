@@ -93,6 +93,12 @@ def manhattan_distance(i1, j1, i2, j2):
     return abs(i1 - i2) + abs(j1 - j2)
 
 
+def manhattan_distance_time(i_from, j_from, t_from, i_to, j_to, t_to):
+    if t_from > t_to:
+        return math.inf
+    return abs(i_from - i_to) + abs(j_from - j_to) + abs(t_from - t_to)
+
+
 def do_path(node):
     path = []
     while node.parent is not None:
@@ -133,6 +139,46 @@ def A_star(grid_map,
                 continue
 
             new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=heuristic_function(i_goal, j_goal, i, j),
+                                 parent=cur_node)
+            if not CLOSED.was_expanded(new_node):
+                OPEN.add_node(new_node)
+        cur_time += 1
+    return False, None
+
+
+def A_star_DS(grid_map,
+              i_start,
+              j_start,
+              t_start,
+              i_goal,
+              j_goal,
+              t_goal,
+              vertex_constraints,
+              edge_constraints,
+              heuristic_function=manhattan_distance_time
+              ):
+    OPEN = AStarOpen()
+    CLOSED = AStarClosed()
+    start_node = AStarNode(i_start, j_start, t_start, 0, 0)
+    OPEN.add_node(start_node)
+    vertex_max_time = max(map(lambda x: x[1], vertex_constraints)) if vertex_constraints else 0
+    edge_max_time = max(map(lambda x: x[1], edge_constraints)) if edge_constraints else 0
+    max_time = max(edge_max_time, vertex_max_time)
+    cur_time = 0
+    while not OPEN.is_empty():
+        cur_node = OPEN.get_best_node()
+        CLOSED.add_node(cur_node)
+        if cur_node.i == i_goal and cur_node.j == j_goal and cur_node.t == t_goal and cur_time > max_time:
+            return True, do_path(cur_node)
+        for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
+            to, frm, t = (i, j), (cur_node.i, cur_node.j), cur_node.t
+            if (to, t + 1) in vertex_constraints or \
+                    ((to, frm), t) in edge_constraints or \
+                    ((frm, to), t) in edge_constraints:
+                continue
+
+            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1,
+                                 h=heuristic_function(i, j, t + 1, i_goal, j_goal, t_goal),
                                  parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)
