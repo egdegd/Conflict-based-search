@@ -53,25 +53,6 @@ class CBSOpen:
         return heapq.heappop(self.elements)
 
 
-def find_vertex_conflict(node: CBSNode):
-    constraints_vertices = {}  # map from (vertex, time) to path
-    max_len = len(max(node.solutions, key=lambda x: len(x)))
-
-    for t in range(max_len):
-        for i, solution in enumerate(node.solutions):
-            if len(solution) <= t:
-                v = solution[-1]
-            else:
-                v = solution[t]
-            if (v, t) in constraints_vertices.keys():
-                j = constraints_vertices[(v, t)]
-                return i, j, v, t
-
-            constraints_vertices[(v, t)] = i
-
-    return None, None, None, None
-
-
 def find_edge_conflict(node: CBSNode):
     # time associated with edge is the start time
     constraints_edges = {}  # map from (from_vertex, to_vertex, from_time) to path
@@ -139,7 +120,7 @@ class CBS:
     def find_best_solutions(self):
         while not self.OPEN.is_empty():
             best_node = self.OPEN.get_best_node()
-            agent1_vert, agent2_vert, v, t_vert = find_vertex_conflict(best_node)
+            agent1_vert, agent2_vert, v, t_vert = self.find_vertex_conflict(best_node)
             if agent1_vert is not None:
                 self.add_children_from_vertex_constraint(best_node, agent1_vert, agent2_vert, v, t_vert)
             else:
@@ -148,3 +129,22 @@ class CBS:
                     self.add_children_from_edge_constraint(best_node, agent1_edge, agent2_edge, e, t_edge)
                 else:
                     return best_node.solutions, best_node.cost
+
+    def find_vertex_conflict(self, node: CBSNode):
+        constraints_vertices = {}  # map from (vertex, time) to path
+        max_len = len(max(node.solutions, key=lambda x: len(x)))
+
+        for t in range(max_len):
+            for i, solution in enumerate(node.solutions):
+                if len(solution) <= t:
+                    v = solution[-1]
+                else:
+                    v = solution[t]
+                if (v, t) in constraints_vertices.keys():
+                    j = constraints_vertices[(v, t)]
+                    return i, j, v, t
+
+                constraints_vertices[(v, t)] = i
+
+        return None, None, None, None
+
