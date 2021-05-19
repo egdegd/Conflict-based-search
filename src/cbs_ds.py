@@ -21,10 +21,10 @@ class CBS_DS_Node(CBSNode):
                     self.cost = math.inf
                     return
                 path += path_segment[1:]
-            v_last, _ = self.landmarks[i][-1]
+            v_last, t1 = self.landmarks[i][-1]
 
             found, path_segment = A_star(grid_map, v_last[0], v_last[1], f[0], f[1],
-                                         self.vertex_constraints[i], self.edge_constraints[i])
+                                         self.vertex_constraints[i], self.edge_constraints[i], t_start=t1)
             if not found:
                 self.cost = math.inf
                 return
@@ -57,7 +57,7 @@ class CBS_DS(CBS):
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
-        if new_node_2.cost < math.inf:
+        if new_node_2.cost < math.inf and (vertex, time) not in node.landmarks[agent1]:
             self.OPEN.add_node(new_node_2)
 
     def add_children_from_edge_constraint(self, node: CBS_DS_Node, agent1, agent2, edge, time):

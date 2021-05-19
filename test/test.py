@@ -28,7 +28,7 @@ def A_star_test(path):
 def CBS_test(task_map, agents, status):
     cbs = CBS(task_map, agents)
     sol, cost = cbs.find_best_solutions()
-    # draw(task_map, sol, agents)
+    draw(task_map, sol, agents)
     if cost < math.inf:
         status.append("Found!")
     else:
@@ -53,7 +53,7 @@ def big_test(scenario_path,
              experiment_time=60*5,
              target_function=CBS_test):
 
-    seed(1337)
+    # seed(1337)
     agents, map_file = read_tasks_from_moving_ai_file(scenario_path)
     width, height, cell = read_map_from_moving_ai_file(path.join('..', 'data', 'maps', map_file))
     task_map = Map()
@@ -65,6 +65,8 @@ def big_test(scenario_path,
         successes = 0
         for _ in range(sample_times):
             cur_agents = sample(agents, k=agents_n)
+            cur_agents = [((7, 0), (2, 7)), ((0, 7), (2, 5)), ((5, 4), (3, 4)), ((4, 7), (0, 0)), ((4, 6), (1, 7)), ((3, 3), (3, 5)), ((4, 2), (4, 5)), ((2, 1), (3, 0)), ((2, 2), (7, 1)), ((0, 2), (0, 3))]
+            print(cur_agents)
             res = manager.list()
             p = multiprocessing.Process(target=target_function, args=(task_map, cur_agents, res))
             p.start()
@@ -78,9 +80,8 @@ def big_test(scenario_path,
         print(f'{successes} out of {sample_times} successes on {agents_n} agents')
 
 
-
 # big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 10, 10, sample_times=1)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1)
 # big_test('../data/scenarios/towards.scen', 2, 2, 1, 1)
-big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1, target_function=CBS_DS_test)
+big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_function=CBS_DS_test)
 # big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 10, 10, sample_times=1, target_function=CBS_DS_test)
