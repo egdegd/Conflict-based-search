@@ -77,30 +77,31 @@ def find_edge_conflict(node: CBSNode):
 
 
 class CBS:
-    def __init__(self, grid_map, agents):
+    def __init__(self, grid_map, agents, node_type=CBSNode):
         self.grid_map = grid_map
         self.agents = agents
+        self.node_type = node_type
         self.OPEN = CBSOpen()
         self.root = None
         self.make_root()
         self.node_counter = 0
 
     def make_root(self):
-        self.root = CBSNode(defaultdict(lambda: []), defaultdict(lambda: []), self.grid_map, self.agents)
+        self.root = self.node_type(defaultdict(lambda: []), defaultdict(lambda: []), self.grid_map, self.agents)
         self.OPEN.add_node(self.root)
 
     def add_children_from_vertex_constraint(self, node: CBSNode, agent1, agent2, vertex, time):
         edge_constraints = deepcopy(node.edge_constraints)
         vertex_constraints1 = deepcopy(node.vertex_constraints)
         vertex_constraints1[agent1].append((vertex, time))
-        new_node_1 = CBSNode(vertex_constraints1, edge_constraints, self.grid_map,
-                             self.agents, node, self.node_counter)
+        new_node_1 = self.node_type(vertex_constraints1, edge_constraints, self.grid_map,
+                                    self.agents, node, self.node_counter)
         self.node_counter += 1
         vertex_constraints2 = deepcopy(node.vertex_constraints)
         vertex_constraints2[agent2].append((vertex, time))
 
-        new_node_2 = CBSNode(vertex_constraints2, edge_constraints, self.grid_map,
-                             self.agents, node, self.node_counter)
+        new_node_2 = self.node_type(vertex_constraints2, edge_constraints, self.grid_map,
+                                    self.agents, node, self.node_counter)
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
@@ -111,14 +112,14 @@ class CBS:
         vertex_constraints = deepcopy(node.vertex_constraints)
         edge_constraints1 = deepcopy(node.edge_constraints)
         edge_constraints1[agent1].append((edge, time))
-        new_node_1 = CBSNode(vertex_constraints, edge_constraints1, self.grid_map,
-                             self.agents, node, self.node_counter)
+        new_node_1 = self.node_type(vertex_constraints, edge_constraints1, self.grid_map,
+                                    self.agents, node, self.node_counter)
         self.node_counter += 1
         edge_constraints2 = deepcopy(node.edge_constraints)
         edge_constraints2[agent2].append((edge, time))
 
-        new_node_2 = CBSNode(vertex_constraints, edge_constraints2, self.grid_map,
-                             self.agents, node, self.node_counter)
+        new_node_2 = self.node_type(vertex_constraints, edge_constraints2, self.grid_map,
+                                    self.agents, node, self.node_counter)
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
@@ -155,4 +156,3 @@ class CBS:
                 constraints_vertices[(v, t)] = i
 
         return None, None, None, None
-
