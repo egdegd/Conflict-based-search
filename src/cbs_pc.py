@@ -25,14 +25,18 @@ class CBS_PC(CBS):
         semi_card = []
         non_card = []
         for i, j, v, t in conflicts:
-            if i not in mdds:
+            if i not in mdds or len(mdds[i]) < t:
                 start = node.solutions[i][0]
                 finish = node.solutions[i][-1]
-                mdds[i] = mdd_build(self.grid_map, start[0], start[1], finish[0], finish[1], node.cost)
-            if j not in mdds:
+                cost = max(len(node.solutions[i]) - 1, t)
+                mdds[i] = mdd_build(self.grid_map, start[0], start[1], finish[0], finish[1], cost,
+                                    node.vertex_constraints[i], node.edge_constraints[i])
+            if j not in mdds or len(mdds[j]) < t:
                 start = node.solutions[j][0]
                 finish = node.solutions[j][-1]
-                mdds[j] = mdd_build(self.grid_map, start[0], start[1], finish[0], finish[1], node.cost)
+                cost = max(len(node.solutions[j]) - 1, t)
+                mdds[j] = mdd_build(self.grid_map, start[0], start[1], finish[0], finish[1], cost,
+                                    node.vertex_constraints[j], node.edge_constraints[j])
             if len(mdds[i][t]) == 1 and len(mdds[j][t]) == 1:
                 return i, j, v, t
             elif len(mdds[i][t]) == 1 or len(mdds[j][t]) == 1:

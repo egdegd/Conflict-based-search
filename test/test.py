@@ -6,6 +6,7 @@ from src.a_star import A_star
 from src.cbs import CBS
 from src.cbs_ds import CBS_DS
 from src.cbs_h import CBS_H
+from src.cbs_pc import CBS_PC
 from src.map import Map
 from movingai import read_map_from_moving_ai_file, read_tasks_from_moving_ai_file
 from os import path
@@ -29,6 +30,16 @@ def A_star_test(path):
 def CBS_test(task_map, agents, status):
     cbs = CBS(task_map, agents)
     sol, cost = cbs.find_best_solutions()
+    # draw(task_map, sol, agents)
+    if cost < math.inf:
+        status.append("Found!")
+    else:
+        status.append("Not found!")
+
+
+def CBS_PC_test(task_map, agents, status):
+    cbs_pc = CBS_PC(task_map, agents)
+    sol, cost = cbs_pc.find_best_solutions()
     # draw(task_map, sol, agents)
     if cost < math.inf:
         status.append("Found!")
@@ -93,8 +104,9 @@ def big_test(scenario_path,
 
 big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 15, 15, sample_times=1)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1)
-# big_test('../data/scenarios/towards.scen', 2, 2, 1, 1, target_function=CBS_DS_test)
-# big_test('../data/scenarios/mice.scen', 2, 2, 1, 1, target_function=CBS_DS_test)
-# big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1, target_function=CBS_DS_test)
+# big_test('../data/scenarios/towards.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
+# big_test('../data/scenarios/mice.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
+# big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_function=CBS_PC_test)
+# big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 15, 15, sample_times=1, target_function=CBS_PC_test)
 # big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 10, 10, sample_times=1, target_function=CBS_DS_test)
 big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 15, 15, sample_times=1, target_function=CBS_H_test)

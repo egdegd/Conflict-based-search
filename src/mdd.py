@@ -3,13 +3,19 @@ def mdd_build(grid_map,
               j_start,
               i_goal,
               j_goal,
-              cost):
+              cost,
+              vertex_constraints,
+              edge_constraints):
     h = {c: {} for c in range(cost + 1)}
     h[0][(i_start, j_start)] = set()
     for c in range(cost):
         for i, j in h[c].keys():
             for (i_, j_) in grid_map.get_neighbors(i, j):
                 to, frm = (i_, j_), (i, j)
+                if (to, c + 1) in vertex_constraints or \
+                        ((to, frm), c) in edge_constraints or \
+                        ((frm, to), c) in edge_constraints:
+                    continue
                 if to not in h[c + 1]:
                     h[c + 1][to] = {frm}
                 else:
