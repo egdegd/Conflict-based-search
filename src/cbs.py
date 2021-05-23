@@ -13,7 +13,7 @@ class CBSNode:
         self.grid_map = grid_map
         self.agents = agents
         if parent is not None:
-            self.solutions = parent.solutions
+            self.solutions = deepcopy(parent.solutions)
         else:
             self.solutions = [None for _ in range(len(agents))]
         if agents_to_recompute_ind is None:

@@ -4,8 +4,8 @@ from src.mdd import mdd_build
 
 
 class CBS_H_Node(CBSNode):
-    def __init__(self, vertex_constraints, edge_constraints, grid_map, agents, parent=None, k=0):
-        super().__init__(vertex_constraints, edge_constraints, grid_map, agents, parent, k)
+    def __init__(self, vertex_constraints, edge_constraints, grid_map, agents, parent=None, k=0, agents_to_recompute_ind=None):
+        super().__init__(vertex_constraints, edge_constraints, grid_map, agents, parent, k, agents_to_recompute_ind=agents_to_recompute_ind)
         self.h = self.calc_h()
 
     def __lt__(self, other: 'CBS_H_Node'):
@@ -34,13 +34,13 @@ class CBS_H_Node(CBSNode):
         mdds = {}
         cardinal_conflicts = []
         for i, j, v, t in conflicts:
-            if i not in mdds or len(mdds[i]) < t:
+            if i not in mdds or len(mdds[i]) < t + 1:
                 start = self.solutions[i][0]
                 finish = self.solutions[i][-1]
                 cost = max(len(self.solutions[i]) - 1, t)
                 mdds[i] = mdd_build(self.grid_map, start[0], start[1], finish[0], finish[1], cost,
                                     self.vertex_constraints[i], self.edge_constraints[i])
-            if j not in mdds or len(mdds[j]) < t:
+            if j not in mdds or len(mdds[j]) < t + 1:
                 start = self.solutions[j][0]
                 finish = self.solutions[j][-1]
                 cost = max(len(self.solutions[j]) - 1, t)

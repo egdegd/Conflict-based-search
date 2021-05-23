@@ -11,7 +11,6 @@ class CBS_DS_Node(CBSNode):
         super().__init__(vertex_constraints, edge_constraints, grid_map, agents, parent, k, agents_to_recompute_ind)
 
     def find_best_solutions(self, grid_map, agents_to_recompute_ind):
-        self.solutions = []
         for i in agents_to_recompute_ind:
             s, f = self.agents[i]
             path = [s]
@@ -30,7 +29,7 @@ class CBS_DS_Node(CBSNode):
                 self.cost = math.inf
                 return
             path += path_segment[1:]
-            self.solutions.append(path)
+            self.solutions[i] = path
 
 
 class CBS_DS(CBS):
