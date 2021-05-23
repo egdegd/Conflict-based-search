@@ -30,6 +30,7 @@ def A_star_test(path):
 def CBS_test(task_map, agents, status):
     cbs = CBS(task_map, agents)
     sol, cost = cbs.find_best_solutions()
+    print("Plain: cost =", str(cost))
     # draw(task_map, sol, agents)
     if cost < math.inf:
         status.append("Found!")
@@ -40,6 +41,7 @@ def CBS_test(task_map, agents, status):
 def CBS_PC_test(task_map, agents, status):
     cbs_pc = CBS_PC(task_map, agents)
     sol, cost = cbs_pc.find_best_solutions()
+    print("PC: cost =", str(cost))
     # draw(task_map, sol, agents)
     if cost < math.inf:
         status.append("Found!")
@@ -50,6 +52,7 @@ def CBS_PC_test(task_map, agents, status):
 def CBS_DS_test(task_map, agents, status):
     cbs_ds = CBS_DS(task_map, agents)
     sol, cost = cbs_ds.find_best_solutions()
+    print("DS: cost =", str(cost))
     # draw(task_map, sol, agents)
     if cost < math.inf:
         status.append("Found!")
@@ -60,6 +63,7 @@ def CBS_DS_test(task_map, agents, status):
 def CBS_H_test(task_map, agents, status):
     cbs_h = CBS_H(task_map, agents)
     sol, cost = cbs_h.find_best_solutions()
+    print("H: cost =", str(cost))
     # draw(task_map, sol, agents)
     if cost < math.inf:
         status.append("Found!")
@@ -102,11 +106,11 @@ def big_test(scenario_path,
     print(f'Time spent: {time.time() - cur_time}')
 
 
-big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 15, 15, sample_times=1)
+big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1)
 # big_test('../data/scenarios/towards.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
 # big_test('../data/scenarios/mice.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
-# big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_function=CBS_PC_test)
-# big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 15, 15, sample_times=1, target_function=CBS_PC_test)
-# big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 10, 10, sample_times=1, target_function=CBS_DS_test)
-big_test('../data/scenarios/Berlin_1_256/Berlin_1_256-even-1.scen', 15, 15, sample_times=1, target_function=CBS_H_test)
+# big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_function=CBS_H_test)
+big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1, target_function=CBS_PC_test)
+big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1, target_function=CBS_DS_test)
+big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1, target_function=CBS_H_test)
