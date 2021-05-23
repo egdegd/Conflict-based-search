@@ -7,31 +7,34 @@ from src.a_star import A_star
 
 
 class CBSNode:
-    def __init__(self, vertex_constraints, edge_constraints, grid_map, agents, parent=None, k=0):
+    def __init__(self, vertex_constraints, edge_constraints, grid_map, agents, parent=None, k=0, agents_to_recompute_ind=None):
         self.vertex_constraints = vertex_constraints
         self.edge_constraints = edge_constraints
         self.grid_map = grid_map
+        self.agents = agents
         if parent is not None:
             self.solutions = parent.solutions
         else:
-            self.solutions = None
+            self.solutions = [None for _ in range(len(agents))]
+        if agents_to_recompute_ind is None:
+            agents_to_recompute_ind = range(len(agents))
         self.k = k
         self.cost = None
         self.parent = parent
-        self.find_best_solutions(grid_map, agents)
+        self.find_best_solutions(grid_map, agents_to_recompute_ind)
         self.sum_of_individual_costs()
 
     def __lt__(self, other: 'CBSNode'):
         return (self.cost, -self.k) < (other.cost, -other.k)
 
-    def find_best_solutions(self, grid_map, agents):
-        self.solutions = []
-        for i, (s, f) in enumerate(agents):
+    def find_best_solutions(self, grid_map, agents_to_recompute_ind):
+        for i in agents_to_recompute_ind:
+            s, f = self.agents[i]
             found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.vertex_constraints[i], self.edge_constraints[i])
             if not found:
                 self.cost = math.inf
                 return
-            self.solutions.append(path)
+            self.solutions[i] = path
 
     def sum_of_individual_costs(self):
         if self.cost is not None:
@@ -95,13 +98,13 @@ class CBS:
         vertex_constraints1 = deepcopy(node.vertex_constraints)
         vertex_constraints1[agent1].append((vertex, time))
         new_node_1 = self.node_type(vertex_constraints1, edge_constraints, self.grid_map,
-                                    self.agents, node, self.node_counter)
+                                    self.agents, node, self.node_counter, agents_to_recompute_ind=[agent1])
         self.node_counter += 1
         vertex_constraints2 = deepcopy(node.vertex_constraints)
         vertex_constraints2[agent2].append((vertex, time))
 
         new_node_2 = self.node_type(vertex_constraints2, edge_constraints, self.grid_map,
-                                    self.agents, node, self.node_counter)
+                                    self.agents, node, self.node_counter, agents_to_recompute_ind=[agent2])
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
@@ -113,13 +116,13 @@ class CBS:
         edge_constraints1 = deepcopy(node.edge_constraints)
         edge_constraints1[agent1].append((edge, time))
         new_node_1 = self.node_type(vertex_constraints, edge_constraints1, self.grid_map,
-                                    self.agents, node, self.node_counter)
+                                    self.agents, node, self.node_counter, agents_to_recompute_ind=[agent1])
         self.node_counter += 1
         edge_constraints2 = deepcopy(node.edge_constraints)
         edge_constraints2[agent2].append((edge, time))
 
         new_node_2 = self.node_type(vertex_constraints, edge_constraints2, self.grid_map,
-                                    self.agents, node, self.node_counter)
+                                    self.agents, node, self.node_counter, agents_to_recompute_ind=[agent2])
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)

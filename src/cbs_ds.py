@@ -6,13 +6,14 @@ from src.a_star import A_star_DS, A_star
 
 
 class CBS_DS_Node(CBSNode):
-    def __init__(self, vertex_constraints, edge_constraints, landmarks, grid_map, agents, parent=None, k=0):
+    def __init__(self, vertex_constraints, edge_constraints, landmarks, grid_map, agents, parent=None, k=0, agents_to_recompute_ind=None):
         self.landmarks = landmarks  # map from agents to must_have vertices
-        super().__init__(vertex_constraints, edge_constraints, grid_map, agents, parent, k)
+        super().__init__(vertex_constraints, edge_constraints, grid_map, agents, parent, k, agents_to_recompute_ind)
 
-    def find_best_solutions(self, grid_map, agents):
+    def find_best_solutions(self, grid_map, agents_to_recompute_ind):
         self.solutions = []
-        for i, (s, f) in enumerate(agents):
+        for i in agents_to_recompute_ind:
+            s, f = self.agents[i]
             path = [s]
             for (v1, t1), (v2, t2) in zip(self.landmarks[i], self.landmarks[i][1:]):
                 found, path_segment = A_star_DS(grid_map, v1[0], v1[1], t1, v2[0], v2[1], t2,
@@ -46,7 +47,7 @@ class CBS_DS(CBS):
         landmarks1 = deepcopy(node.landmarks)
         vertex_constraints1[agent1].append((vertex, time))
         new_node_1 = CBS_DS_Node(vertex_constraints1, edge_constraints, landmarks1, self.grid_map,
-                                 self.agents, node, self.node_counter)
+                                 self.agents, node, self.node_counter, agents_to_recompute_ind=[agent1])
         self.node_counter += 1
 
         vertex_constraints2 = deepcopy(node.vertex_constraints)
@@ -54,7 +55,7 @@ class CBS_DS(CBS):
         landmarks2 = deepcopy(node.landmarks)
         landmarks2[agent1] = sorted(landmarks2[agent1] + [(vertex, time)], key=lambda l: l[1])
         new_node_2 = CBS_DS_Node(vertex_constraints2, edge_constraints, landmarks2, self.grid_map,
-                                 self.agents, node, self.node_counter)
+                                 self.agents, node, self.node_counter, agents_to_recompute_ind=[agent1, agent2])
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
@@ -67,13 +68,13 @@ class CBS_DS(CBS):
         edge_constraints1 = deepcopy(node.edge_constraints)
         edge_constraints1[agent1].append((edge, time))
         new_node_1 = CBS_DS_Node(vertex_constraints, edge_constraints1, landmarks, self.grid_map,
-                                 self.agents, node, self.node_counter)
+                                 self.agents, node, self.node_counter, agents_to_recompute_ind=[agent1])
         self.node_counter += 1
         edge_constraints2 = deepcopy(node.edge_constraints)
         edge_constraints2[agent2].append((edge, time))
 
         new_node_2 = CBS_DS_Node(vertex_constraints, edge_constraints2, landmarks, self.grid_map,
-                                 self.agents, node, self.node_counter)
+                                 self.agents, node, self.node_counter, agents_to_recompute_ind=[agent2])
         self.node_counter += 1
         if new_node_1.cost < math.inf:
             self.OPEN.add_node(new_node_1)
