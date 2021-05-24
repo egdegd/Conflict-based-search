@@ -3,7 +3,7 @@ import heapq
 from collections import defaultdict
 from copy import deepcopy
 
-from src.a_star import A_star
+from src.a_star import A_star, RealDistanceFinder
 
 
 class CBSNode:
@@ -14,8 +14,10 @@ class CBSNode:
         self.agents = agents
         if parent is not None:
             self.solutions = deepcopy(parent.solutions)
+            self.finders = parent.finders
         else:
             self.solutions = [None for _ in range(len(agents))]
+            self.finders = [RealDistanceFinder(s[0], s[1], f[0], f[1], grid_map) for s, f in agents]
         if agents_to_recompute_ind is None:
             agents_to_recompute_ind = range(len(agents))
         self.k = k
@@ -30,7 +32,8 @@ class CBSNode:
     def find_best_solutions(self, grid_map, agents_to_recompute_ind):
         for i in agents_to_recompute_ind:
             s, f = self.agents[i]
-            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.vertex_constraints[i], self.edge_constraints[i])
+            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.vertex_constraints[i], self.edge_constraints[i],
+                                 self.finders[i])
             if not found:
                 self.cost = math.inf
                 return
@@ -49,9 +52,11 @@ class CBSNode:
 class CBSOpen:
     def __init__(self):
         self.elements = []
+        self.cnt = 0
 
     def add_node(self, node):
         heapq.heappush(self.elements, node)
+        self.cnt += 1
 
     def is_empty(self):
         return len(self.elements) == 0
@@ -140,7 +145,7 @@ class CBS:
                 if agent1_edge is not None:
                     self.add_children_from_edge_constraint(best_node, agent1_edge, agent2_edge, e, t_edge)
                 else:
-                    return best_node.solutions, best_node.cost
+                    return best_node.solutions, best_node.cost, self.OPEN.cnt
 
     def find_vertex_conflict(self, node: CBSNode):
         constraints_vertices = {}  # map from (vertex, time) to path

@@ -59,7 +59,7 @@ class AStarOpen:
     def add_node(self, item: AStarNode):
         if item in self.exists:
             old_node = self.exists[item]
-            if old_node.node.g < item.g:
+            if old_node.node.g <= item.g:
                 return
             old_node.removed = True
         new_node_heap = AStarNodeHeap(item, self.k)
@@ -99,6 +99,34 @@ def manhattan_distance_time(i_from, j_from, t_from, i_to, j_to, t_to):
     return abs(i_from - i_to) + abs(j_from - j_to) + abs(t_from - t_to)
 
 
+class RealDistanceFinder:
+    def __init__(self, i_start, j_start, i_goal, j_goal, grid_map):
+        status, OPEN, CLOSED = A_star_backward(grid_map, i_goal, j_goal, i_start, j_start)
+        self.OPEN = OPEN
+        self.CLOSED = CLOSED
+        self.i_start = i_start
+        self.j_start = j_start
+        self.grid_map = grid_map
+
+    def find_dist(self, i, j):
+        node = AStarBackwardNode(i, j, 0, 0)
+        if node in self.CLOSED:
+            return self.CLOSED[node]
+        else:
+            while not self.OPEN.is_empty():
+                cur_node = self.OPEN.get_best_node()
+                self.CLOSED.add_node(cur_node)
+                if cur_node.i == i and cur_node.j == j:
+                    return cur_node.g
+                for (i, j) in self.grid_map.get_neighbors(cur_node.i, cur_node.j):
+
+                    new_node = AStarBackwardNode(i, j, g=cur_node.g + 1, h=manhattan_distance(self.i_start, self.j_start, i, j),
+                                                 parent=cur_node)
+                    if not self.CLOSED.was_expanded(new_node):
+                        self.OPEN.add_node(new_node)
+            return 10
+
+
 def do_path(node):
     path = []
     while node.parent is not None:
@@ -116,7 +144,7 @@ def A_star(grid_map,
            j_goal,
            vertex_constraints,
            edge_constraints,
-           heuristic_function=manhattan_distance,
+           finder=None,
            t_start=0):
     OPEN = AStarOpen()
     CLOSED = AStarClosed()
@@ -137,7 +165,7 @@ def A_star(grid_map,
                     ((frm, to), t) in edge_constraints:
                 continue
 
-            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=heuristic_function(i_goal, j_goal, i, j),
+            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=finder.find_dist(i, j),
                                  parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)
@@ -179,6 +207,69 @@ def A_star_DS(grid_map,
             new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1,
                                  h=heuristic_function(i, j, t + 1, i_goal, j_goal, t_goal),
                                  parent=cur_node)
+            if not CLOSED.was_expanded(new_node):
+                OPEN.add_node(new_node)
+    return False, None
+
+
+class AStarBackwardNode:
+    def __init__(self, i=-1, j=-1, g=math.inf, h=math.inf, F=None, parent=None):
+        self.i = i
+        self.j = j
+        self.g = g
+        self.h = h
+        if F is None:
+            self.F = self.g + h
+        else:
+            self.F = F
+        self.parent = parent
+
+    def __eq__(self, other):
+        return (self.i == other.i) and (self.j == other.j)
+
+    def __hash__(self):
+        return hash((self.i, self.j))
+
+
+class AStarBackwardClosed:
+    def __init__(self):
+        self.elements = {}
+
+    def __iter__(self):
+        return iter(self.elements.keys())
+
+    def __len__(self):
+        return len(self.elements.keys())
+
+    def add_node(self, item: AStarBackwardNode, *args):
+        self.elements[item] = item.g
+
+    def was_expanded(self, item: AStarBackwardNode, *args):
+        return item in self.elements
+
+    def __getitem__(self, item):
+        return self.elements[item]
+
+
+def A_star_backward(grid_map,
+                    i_start,
+                    j_start,
+                    i_goal,
+                    j_goal,
+                    heuristic_function=manhattan_distance):
+    OPEN = AStarOpen()
+    CLOSED = AStarBackwardClosed()
+    start_node = AStarBackwardNode(i_start, j_start, 0, 0)
+    OPEN.add_node(start_node)
+    while not OPEN.is_empty():
+        cur_node = OPEN.get_best_node()
+        CLOSED.add_node(cur_node)
+        if cur_node.i == i_goal and cur_node.j == j_goal:
+            return True, OPEN, CLOSED
+        for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
+
+            new_node = AStarBackwardNode(i, j, g=cur_node.g + 1, h=heuristic_function(i_goal, j_goal, i, j),
+                                         parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)
     return False, None

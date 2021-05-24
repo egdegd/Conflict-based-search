@@ -23,8 +23,8 @@ class CBS_DS_Node(CBSNode):
                 path += path_segment[1:]
             v_last, t1 = self.landmarks[i][-1]
 
-            found, path_segment = A_star(grid_map, v_last[0], v_last[1], f[0], f[1],
-                                         self.vertex_constraints[i], self.edge_constraints[i], t_start=t1)
+            found, path_segment = A_star(grid_map, v_last[0], v_last[1], f[0], f[1], self.vertex_constraints[i],
+                                         self.edge_constraints[i], self.finders[i], t_start=t1)
             if not found:
                 self.cost = math.inf
                 return
