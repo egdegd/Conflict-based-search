@@ -43,6 +43,8 @@ def read_tasks_from_moving_ai_file(path):
     map_file = ''
     for line in tasks_file:
         task = line.split()
+        if int(task[0]) > 50:
+            continue
         tasks.append(((int(task[5]), int(task[4])), (int(task[7]), int(task[6]))))
         map_file = task[1]
     return tasks, map_file

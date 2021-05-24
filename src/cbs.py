@@ -3,7 +3,7 @@ import heapq
 from collections import defaultdict
 from copy import deepcopy
 
-from src.a_star import A_star
+from src.a_star import A_star, RealDistanceFinder
 
 
 class CBSNode:
@@ -49,9 +49,11 @@ class CBSNode:
 class CBSOpen:
     def __init__(self):
         self.elements = []
+        self.cnt = 0
 
     def add_node(self, node):
         heapq.heappush(self.elements, node)
+        self.cnt += 1
 
     def is_empty(self):
         return len(self.elements) == 0
@@ -140,7 +142,7 @@ class CBS:
                 if agent1_edge is not None:
                     self.add_children_from_edge_constraint(best_node, agent1_edge, agent2_edge, e, t_edge)
                 else:
-                    return best_node.solutions, best_node.cost
+                    return best_node.solutions, best_node.cost, self.OPEN.cnt
 
     def find_vertex_conflict(self, node: CBSNode):
         constraints_vertices = {}  # map from (vertex, time) to path
