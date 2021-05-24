@@ -79,7 +79,7 @@ def big_test(scenario_path,
             if len(res) == 3 and res[2] == 'Found!':
                 successes += 1
                 nodes[-1] += [res[1]]
-            times[-1] += [time.time() - start_time]
+                times[-1] += [time.time() - start_time]
         successes_ratios += [successes / sample_times]
         print(f'{successes} out of {sample_times} successes on {agents_n} agents')
     spended_time = time.time() - cur_time
@@ -88,7 +88,7 @@ def big_test(scenario_path,
 
 
 
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1)
 # big_test('../data/scenarios/towards.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
 # big_test('../data/scenarios/mice.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
