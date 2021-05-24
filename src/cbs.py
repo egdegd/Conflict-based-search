@@ -14,10 +14,8 @@ class CBSNode:
         self.agents = agents
         if parent is not None:
             self.solutions = deepcopy(parent.solutions)
-            self.finders = parent.finders
         else:
             self.solutions = [None for _ in range(len(agents))]
-            self.finders = [RealDistanceFinder(s[0], s[1], f[0], f[1], grid_map) for s, f in agents]
         if agents_to_recompute_ind is None:
             agents_to_recompute_ind = range(len(agents))
         self.k = k
@@ -32,8 +30,7 @@ class CBSNode:
     def find_best_solutions(self, grid_map, agents_to_recompute_ind):
         for i in agents_to_recompute_ind:
             s, f = self.agents[i]
-            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.vertex_constraints[i], self.edge_constraints[i],
-                                 self.finders[i])
+            found, path = A_star(grid_map, s[0], s[1], f[0], f[1], self.vertex_constraints[i], self.edge_constraints[i])
             if not found:
                 self.cost = math.inf
                 return

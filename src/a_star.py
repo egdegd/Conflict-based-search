@@ -101,7 +101,7 @@ def manhattan_distance_time(i_from, j_from, t_from, i_to, j_to, t_to):
 
 class RealDistanceFinder:
     def __init__(self, i_start, j_start, i_goal, j_goal, grid_map):
-        status, OPEN, CLOSED = A_star_backward(grid_map, i_goal, j_goal, i_start, j_start)
+        status, OPEN, CLOSED, _ = A_star_backward(grid_map, i_goal, j_goal, i_start, j_start)
         self.OPEN = OPEN
         self.CLOSED = CLOSED
         self.i_start = i_start
@@ -144,12 +144,15 @@ def A_star(grid_map,
            j_goal,
            vertex_constraints,
            edge_constraints,
-           finder=None,
+           heuristic_function=manhattan_distance,
            t_start=0):
     OPEN = AStarOpen()
     CLOSED = AStarClosed()
     start_node = AStarNode(i_start, j_start, t_start, 0, 0)
     OPEN.add_node(start_node)
+    if len(vertex_constraints) == 0 and len(edge_constraints) == 0:
+        status, _, _, path = A_star_backward(grid_map, i_start, j_start, i_goal, j_goal)
+        return status, path
     vertex_max_time = max(map(lambda x: x[1], vertex_constraints)) if vertex_constraints else 0
     edge_max_time = max(map(lambda x: x[1], edge_constraints)) if edge_constraints else 0
     max_time = max(edge_max_time, vertex_max_time)
@@ -165,7 +168,7 @@ def A_star(grid_map,
                     ((frm, to), t) in edge_constraints:
                 continue
 
-            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=finder.find_dist(i, j),
+            new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1, h=heuristic_function(i_goal, j_goal, i, j),
                                  parent=cur_node)
             if not CLOSED.was_expanded(new_node):
                 OPEN.add_node(new_node)
@@ -187,6 +190,9 @@ def A_star_DS(grid_map,
     CLOSED = AStarClosed()
     start_node = AStarNode(i_start, j_start, t_start, 0, 0)
     OPEN.add_node(start_node)
+    if len(vertex_constraints) == 0 and len(edge_constraints) == 0:
+        status, _, _, path = A_star_backward(grid_map, i_start, j_start, i_goal, j_goal)
+        return status, path
     vertex_max_time = max(map(lambda x: x[1], vertex_constraints)) if vertex_constraints else 0
     edge_max_time = max(map(lambda x: x[1], edge_constraints)) if edge_constraints else 0
     max_time = max(edge_max_time, vertex_max_time)
@@ -265,7 +271,7 @@ def A_star_backward(grid_map,
         cur_node = OPEN.get_best_node()
         CLOSED.add_node(cur_node)
         if cur_node.i == i_goal and cur_node.j == j_goal:
-            return True, OPEN, CLOSED
+            return True, OPEN, CLOSED, do_path(cur_node)
         for (i, j) in grid_map.get_neighbors(cur_node.i, cur_node.j):
 
             new_node = AStarBackwardNode(i, j, g=cur_node.g + 1, h=heuristic_function(i_goal, j_goal, i, j),

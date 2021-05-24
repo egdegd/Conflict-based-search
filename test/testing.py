@@ -88,7 +88,7 @@ def big_test(scenario_path,
 
 
 
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 5, 5, 1, 1)
 # big_test('../data/scenarios/towards.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
 # big_test('../data/scenarios/mice.scen', 2, 2, 1, 1, target_function=CBS_PC_test)
@@ -96,7 +96,11 @@ def big_test(scenario_path,
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_class=CBS_PC)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_class=CBS_DS)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_class=CBS_H)
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1, target_class=CBS_PC)
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1, target_class=CBS_DS)
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, step=1, sample_times=1, target_class=CBS_H, experiment_time=300)
-big_test('../data/scenarios/ost003d/ost003d-even-25.scen', 5, 10, step=1, sample_times=2, target_class=CBS_H, experiment_time=300)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1, target_class=CBS_PC)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1, target_class=CBS_DS)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, step=1, sample_times=1, target_class=CBS_H, experiment_time=300)
+# big_test('../data/scenarios/ost003d/ost003d-even-25.scen', 5, 10, step=1, sample_times=2, target_class=CBS, experiment_time=300)
+# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS, experiment_time=300)
+# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS_PC, experiment_time=300)
+# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS_DS, experiment_time=300)
+# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS_H, experiment_time=300)
