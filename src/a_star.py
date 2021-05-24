@@ -1,5 +1,6 @@
 import heapq
 import math
+from collections import defaultdict
 
 
 class AStarNode:
@@ -20,6 +21,12 @@ class AStarNode:
 
     def __hash__(self):
         return hash((self.i, self.j, self.t))
+
+    def __str__(self):
+        return f'(i: {self.i}, j: {self.j}, t: {self.t})'
+
+    def __repr__(self):
+        return self.__str__()
 
 
 class AStarNodeHeap:
@@ -153,7 +160,7 @@ def A_star_DS(grid_map,
               t_goal,
               vertex_constraints,
               edge_constraints,
-              heuristic_function=manhattan_distance_time
+              heuristic_function=manhattan_distance
               ):
     OPEN = AStarOpen()
     CLOSED = AStarClosed()
@@ -164,8 +171,6 @@ def A_star_DS(grid_map,
     max_time = max(edge_max_time, vertex_max_time)
     while not OPEN.is_empty():
         cur_node = OPEN.get_best_node()
-        if cur_node.t > t_goal:
-            continue
         CLOSED.add_node(cur_node)
         if cur_node.i == i_goal and cur_node.j == j_goal and cur_node.t == t_goal and cur_node.t >= max_time:
             return True, do_path(cur_node)
@@ -177,8 +182,8 @@ def A_star_DS(grid_map,
                 continue
 
             new_node = AStarNode(i, j, cur_node.t + 1, g=cur_node.t + 1,
-                                 h=heuristic_function(i, j, t + 1, i_goal, j_goal, t_goal),
+                                 h=heuristic_function(i, j, i_goal, j_goal),
                                  parent=cur_node)
-            if not CLOSED.was_expanded(new_node):
+            if not CLOSED.was_expanded(new_node) and new_node.t + heuristic_function(i, j, i_goal, j_goal) <= t_goal:
                 OPEN.add_node(new_node)
     return False, None
