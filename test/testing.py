@@ -33,9 +33,7 @@ def CBS_test(task_map, agents, status, target_class=CBS):
     sol, cost, nodes_cnt = cbs.find_best_solutions()
     print(f"{target_class.__name__}: cost = {str(cost)}, nodes = {str(nodes_cnt)}")
     # draw(task_map, sol, agents)
-    if sol is None:
-        status.append("Not found!")
-    elif cost < math.inf:
+    if cost < math.inf:
         status.append(cost)
         status.append(nodes_cnt)
         status.append("Found!")
@@ -81,7 +79,7 @@ def big_test(scenario_path,
             if len(res) == 3 and res[2] == 'Found!':
                 successes += 1
                 nodes[-1] += [res[1]]
-                times[-1] += [time.time() - start_time]
+            times[-1] += [time.time() - start_time]
         successes_ratios += [successes / sample_times]
         print(f'{successes} out of {sample_times} successes on {agents_n} agents')
     spended_time = time.time() - cur_time
@@ -98,11 +96,7 @@ def big_test(scenario_path,
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_class=CBS_PC)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_class=CBS_DS)
 # big_test('../data/scenarios/empty_8_8/empty-8-8-even-25.scen', 10, 10, 1, 1, target_class=CBS_H)
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1, target_class=CBS_PC)
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1, target_class=CBS_DS)
-# big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, step=1, sample_times=1, target_class=CBS_H, experiment_time=300)
-# big_test('../data/scenarios/ost003d/ost003d-even-25.scen', 5, 10, step=1, sample_times=2, target_class=CBS, experiment_time=300)
-# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS, experiment_time=300)
-# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS_PC, experiment_time=300)
-# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS_DS, experiment_time=300)
-# big_test('../data/scenarios/room-32-32-4/room-32-32-4-even-1.scen', 5, 10, step=1, sample_times=2, target_class=CBS_H, experiment_time=300)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, sample_times=1, target_class=CBS_PC)
+big_test('../data/scenarios/den520d/den520d-even-1.scen', 10, 10, sample_times=1, target_class=CBS_DS)
+# big_test('../data/scenarios/den520d/den520d-even-1.scen', 6, 6, step=1, sample_times=1, target_class=CBS_H, experiment_time=300)
+# big_test('../data/scenarios/ost003d/ost003d-even-25.scen', 5, 10, step=1, sample_times=2, target_class=CBS_H, experiment_time=300)
