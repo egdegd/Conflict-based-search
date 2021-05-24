@@ -143,6 +143,7 @@ class CBS:
                     self.add_children_from_edge_constraint(best_node, agent1_edge, agent2_edge, e, t_edge)
                 else:
                     return best_node.solutions, best_node.cost, self.OPEN.cnt
+        return None, None, None
 
     def find_vertex_conflict(self, node: CBSNode):
         constraints_vertices = {}  # map from (vertex, time) to path

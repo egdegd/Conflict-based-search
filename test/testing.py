@@ -33,7 +33,9 @@ def CBS_test(task_map, agents, status, target_class=CBS):
     sol, cost, nodes_cnt = cbs.find_best_solutions()
     print(f"{target_class.__name__}: cost = {str(cost)}, nodes = {str(nodes_cnt)}")
     # draw(task_map, sol, agents)
-    if cost < math.inf:
+    if sol is None:
+        status.append("Not found!")
+    elif cost < math.inf:
         status.append(cost)
         status.append(nodes_cnt)
         status.append("Found!")
