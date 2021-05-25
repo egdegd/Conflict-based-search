@@ -7,5 +7,5 @@ Conflict-based search for optimal multi-agent pathfinding
 ```
 
 ```
-python3 <name_file_with_test>
+python3 test/testing.py
 ```
